@@ -1,0 +1,5 @@
+#file created when tenseal is running
+__pycache__/
+
+#contains secret and public key
+keys/
