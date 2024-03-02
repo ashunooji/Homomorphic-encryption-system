@@ -3,3 +3,10 @@ __pycache__/
 
 #contains secret and public key
 keys/
+
+#Recived and stored files in local device
+encrypted_images/
+recieved_images/
+rc/
+
+tempCodeRunnerFile.py
