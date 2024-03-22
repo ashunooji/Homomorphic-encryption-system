@@ -10,7 +10,7 @@ import shutil
 def search_res(res):
     result = []
     for keys,value in res.items():
-        if value > -50 and value < 50:
+        if value > -70 and value < 70:
             result.append(keys)
     return result
 
