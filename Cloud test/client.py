@@ -1,7 +1,7 @@
 import socket
 
 # Server configuration
-SERVER_IP = '192.168.89.119'  # Replace x.x.x.x with the server's public IP address
+SERVER_IP = '172.173.248.90'  # Replace x.x.x.x with the server's public IP address
 SERVER_PORT = 12345  # Server's port number
 
 # Create a socket object
