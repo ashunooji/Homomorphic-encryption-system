@@ -2,7 +2,7 @@ import socket
 
 # Server configuration
 SERVER_IP = '172.173.248.90'  # Replace x.x.x.x with the server's public IP address
-SERVER_PORT = 12345  # Server's port number
+SERVER_PORT = 53  # Server's port number
 
 # Create a socket object
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
