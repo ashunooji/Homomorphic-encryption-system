@@ -1,33 +1,47 @@
 import socket
+import os
 
-# Server configuration
-HOST = '0.0.0.0'  # Listen on all network interfaces
-PORT = 53  # Port to listen on
+def send_photos(conn):
+    folder_path = "Server photos"
+    files = os.listdir(folder_path)
+    for file_name in files:
+        file_path = os.path.join(folder_path, file_name)
+        with open(file_path, 'rb') as file:
+            file_size = os.path.getsize(file_path)
+            # Send file name, size, and data
+            conn.sendall(file_name.encode())
+            conn.recv(1024)  # Wait for ACK
+            conn.sendall(str(file_size).encode())
+            conn.recv(1024)  # Wait for ACK
+            
+            # Send file data in chunks
+            with open(file_path, 'rb') as file:
+                while True:
+                    file_data = file.read(1024)
+                    if not file_data:
+                        break
+                    conn.sendall(file_data)
+                print(f"File '{file_name}' sent")
+                conn.recv(1024)  # Wait for ACK
+            
+    # Signal end of file transfer
+    conn.sendall(b"End")
+    print("All files sent")
 
-# Create a socket object
-server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+if __name__ == "__main__":
+    host = "127.0.0.1"
+    port = 5555
 
-# Bind the socket to the address and port
-server_socket.bind((HOST, PORT))
+    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server_socket.bind((host, port))
+    server_socket.listen(2)
+    print(f"Server listening on {host}:{port}")
 
-# Start listening for incoming connections
-server_socket.listen(1)
-
-print("Server listening on port", PORT)
-
-# Accept a client connection
-client_socket, client_address = server_socket.accept()
-
-print("Connected to client:", client_address)
-
-# Receive data from the client
-data = client_socket.recv(1024)
-
-print("Received:", data.decode())
-
-# Send a response back to the client
-client_socket.sendall("Hello from the server!".encode())
-
-# Close the connection
-client_socket.close()
-server_socket.close()
+    while True:
+        conn, addr = server_socket.accept()
+        print("Connection established with", addr)
+        try:
+            send_photos(conn)
+        finally:
+            conn.close()
+            break
