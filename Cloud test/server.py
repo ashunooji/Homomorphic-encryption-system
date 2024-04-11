@@ -2,7 +2,7 @@ import socket
 
 # Server configuration
 HOST = '0.0.0.0'  # Listen on all network interfaces
-PORT = 53  # Port to listen on
+PORT = 5555  # Port to listen on
 
 # Create a socket object
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
