@@ -32,7 +32,7 @@ def receive_files(client_socket, folder_path):
         print(f"Received file '{filename}'")
 
 def main():
-    host = "127.0.0.1"
+    host = "172.173.248.90"
     port = 5555
 
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
