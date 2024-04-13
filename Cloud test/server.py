@@ -13,7 +13,8 @@ def receive_files(server_socket, folder_path):
         if filename == "End":
             print("All files received")
             e = time.time()
-            conn.sendall(e-s)
+            t = str(e-s)
+            conn.sendall(t.encode())
             break
         
         # Send ACK to signal readiness for file name
