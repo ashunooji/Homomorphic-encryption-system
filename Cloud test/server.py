@@ -1,33 +1,58 @@
 import socket
+import os
+import time
 
-# Server configuration
-HOST = '0.0.0.0'  # Listen on all network interfaces
-PORT = 5555  # Port to listen on
+def receive_files(server_socket, folder_path):
+    conn, addr = server_socket.accept()
+    print("Connection established with", addr)
+    
+    s = time.time()
 
-# Create a socket object
-server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    while True:
+        filename = conn.recv(1024).decode()
+        if filename == "End":
+		print("All files received")
+		e = time.time()
+		conn.sendall(e-s)
+		break
+        
+        # Send ACK to signal readiness for file name
+        conn.sendall(b"ACK")
+        
+        # Receive file size and send ACK
+        file_size = int(conn.recv(1024).decode())
+        conn.sendall(b"ACK")
+        
+        # Receive file data in chunks
+        received_data = b""
+        while len(received_data) < file_size:
+            data_chunk = conn.recv(1024)
+            if not data_chunk:
+                break
+            received_data += data_chunk
+        
+        # Write received data to file
+        with open(os.path.join(folder_path, filename), 'wb') as file:
+            file.write(received_data)
+        
+        # Send ACK to signal successful file reception
+        conn.sendall(b"ACK")
+        print(f"Received file '{filename}'")
 
-# Bind the socket to the address and port
-server_socket.bind((HOST, PORT))
+def main():
+    host = "0.0.0.0"
+    port = 5555
 
-# Start listening for incoming connections
-server_socket.listen(1)
+    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server_socket.bind((host, port))
+    server_socket.listen(2)
+    print(f"Server listening on {host}:{port}")
 
-print("Server listening on port", PORT)
+    folder_path = "Received_photos"
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path)
+    
+    receive_files(server_socket, folder_path)
 
-# Accept a client connection
-client_socket, client_address = server_socket.accept()
-
-print("Connected to client:", client_address)
-
-# Receive data from the client
-data = client_socket.recv(1024)
-
-print("Received:", data.decode())
-
-# Send a response back to the client
-client_socket.sendall("Hello from the server!".encode())
-
-# Close the connection
-client_socket.close()
-server_socket.close()
+if __name__ == "__main__":
+    main()
