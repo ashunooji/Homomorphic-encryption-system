@@ -1,57 +1,46 @@
 import socket
 import os
 
-def receive_files(client_socket, folder_path):
-    while True:
-        filename = client_socket.recv(1024).decode()
-        if filename == "End":
-            print("All files received")
-            break
-        
-        # Send ACK to signal readiness for file name
-        client_socket.sendall(b"ACK")
-        
-        # Receive file size and send ACK
-        file_size = int(client_socket.recv(1024).decode())
-        client_socket.sendall(b"ACK")
-        
-        # Receive file data in chunks
-        received_data = b""
-        while len(received_data) < file_size:
-            data_chunk = client_socket.recv(1024)
-            if not data_chunk:
-                break
-            received_data += data_chunk
-        
-        # Write received data to file
-        with open(os.path.join(folder_path, filename), 'wb') as file:
-            file.write(received_data)
-        
-        # Send ACK to signal successful file reception
-        client_socket.sendall(b"ACK")
-        print(f"Received file '{filename}'")
+def send_photos(client_socket):
+    folder_path = "Server photos"
+    files = os.listdir(folder_path)
+    for file_name in files:
+        file_path = os.path.join(folder_path, file_name)
+        with open(file_path, 'rb') as file:
+            file_size = os.path.getsize(file_path)
+            # Send file name, size, and data
+            client_socket.sendall(file_name.encode())
+            client_socket.recv(1024)  # Wait for ACK
+            client_socket.sendall(str(file_size).encode())
+            client_socket.recv(1024)  # Wait for ACK
+            
+            # Send file data in chunks
+            with open(file_path, 'rb') as file:
+                while True:
+                    file_data = file.read(1024)
+                    if not file_data:
+                        break
+                    client_socket.sendall(file_data)
+                print(f"File '{file_name}' sent")
+                client_socket.recv(1024)  # Wait for ACK
+            
+    # Signal end of file transfer
+    client_socket.sendall(b"End")
+    print("All files sent")
+    t = client_socket.recv(1024)
+    print(f"Time taken to transfer is {t} seconds")
 
 def main():
     host = "172.173.248.90"
+    #host = "127.0.0.1"
     port = 5555
 
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    
-    try:
-        client_socket.connect((host, port))
-        print(f"Connected to server at {host}:{port}")
+    client_socket.connect((host, port))
+    print(f"Connected to server at {host}:{port}")
 
-        folder_path = "Received_photos"
-        if not os.path.exists(folder_path):
-            os.makedirs(folder_path)
-        
-        receive_files(client_socket, folder_path)
-    
-    except Exception as e:
-        print("Error:", e)
-    
-    finally:
-        client_socket.close()
+    send_photos(client_socket)
+    client_socket.close()
 
 if __name__ == "__main__":
     main()
