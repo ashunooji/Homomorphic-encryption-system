@@ -2,16 +2,17 @@ import socket
 import os
 import time
 import shutil
-import tensorflow as ts
+import tenseal as ts
 import utils
 from deepface import DeepFace
 
 def encrypt(folder_path):
-    try:
-        os.makedirs("Encrypted_images")
-    except FileExistsError:
-        shutil.rmtree("Encrypted_images")
-        os.makedirs("Enrypted_images")
+    # try:
+    #     os.makedirs("Encrypted_images")
+    # except FileExistsError:
+    #     shutil.rmtree("Encrypted_images")
+    #     os.makedirs("Enrypted_images")
+    #     pass
 
     context = ts.context_from(utils.read_data("D:\Major project\Virtual environment\Project\Edge\keys\secret.txt"))
 
@@ -76,6 +77,9 @@ def main():
     folder_path = "Received_photos"
     if not os.path.exists(folder_path):
         os.makedirs(folder_path)
+    
+    if not os.path.exists("Encrypted_images"):
+        os.makedirs("Encrypted_images")
     
     receive_files(server_socket, folder_path)
 
