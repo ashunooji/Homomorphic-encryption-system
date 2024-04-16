@@ -1,6 +1,29 @@
 import socket
 import os
 import time
+import shutil
+import tensorflow as ts
+import utils
+from deepface import DeepFace
+
+def encrypt(folder_path):
+    try:
+        os.makedirs("Encrypted_images")
+    except FileExistsError:
+        shutil.rmtree("Encrypted_images")
+        os.makedirs("Enrypted_images")
+
+    context = ts.context_from(utils.read_data("D:\Major project\Virtual environment\Project\Edge\keys\secret.txt"))
+
+    for i in os.listdir(folder_path):
+        try:
+            image_embedding = DeepFace.represent(os.path.join(folder_path,i),model_name="Facenet")[0]['embedding']
+        except ValueError:
+            continue
+        encrypted = ts.ckks_vector(context,image_embedding)
+        utils.write_data(f"Encrypted_images/{i[:-4]}.txt",encrypted.serialize())
+    print("All files encrypted")
+    return
 
 def receive_files(server_socket, folder_path):
     conn, addr = server_socket.accept()
@@ -12,6 +35,7 @@ def receive_files(server_socket, folder_path):
         filename = conn.recv(1024).decode()
         if filename == "End":
             print("All files received")
+            encrypt(folder_path)
             e = time.time()
             t = str(e-s)
             conn.sendall(t.encode())
