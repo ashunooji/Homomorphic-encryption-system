@@ -4,7 +4,7 @@ import os
 def send_photos(client_socket):
     folder_path = "Server photos"
     files = os.listdir(folder_path)
-    for file_name in files:
+    for file_name in files[:20]:
         file_path = os.path.join(folder_path, file_name)
         with open(file_path, 'rb') as file:
             file_size = os.path.getsize(file_path)
@@ -27,12 +27,12 @@ def send_photos(client_socket):
     # Signal end of file transfer
     client_socket.sendall(b"End")
     print("All files sent")
-    t = client_socket.recv(1024)
+    t = client_socket.recv(1024).decode()
     print(f"Time taken to transfer is {t} seconds")
 
 def main():
-    host = "172.173.248.90"
-    #host = "127.0.0.1"
+    #host = "172.173.248.90"
+    host = "127.0.0.1"
     port = 5555
 
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
