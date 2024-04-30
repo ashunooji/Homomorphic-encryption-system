@@ -6,7 +6,7 @@ import utils
 def search_res(res):
     result = []
     for keys,value in res.items():
-        if value > -50 and value < 50:
+        if value > -110 and value < 110:
             result.append(keys)
     return result
 
